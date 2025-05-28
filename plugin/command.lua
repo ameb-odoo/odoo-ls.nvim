@@ -1,4 +1,3 @@
-local util = require('odools.utils')
 local command = {}
 command.target = "0.4.0"
 command.bin_path = ""
@@ -10,6 +9,10 @@ local download = function(url, output_path, asset_type)
     local handle
     local args, cmd
     if asset_type == "file" then
+        if vim.fn.filereadable(output_path) == 1 then
+            vim.api.nvim_echo({{"Delete previous file"}}, true, {})
+            vim.uv.fs_unlink(output_path)
+        end
         cmd = "wget"
         args = { "-qO", output_path, url }
     else
@@ -61,7 +64,6 @@ local download_requirements = function()
     if vim.fn.isdirectory(bin_dir_path) == 0 then
         os.execute('mkdir -p ' .. bin_dir_path)
     end
-    vim.cmd.LspStop('odools')
     download("https://github.com/odoo/odoo-ls/releases/download/" .. command.target .. "/odoo_ls_server", bin_path, 'file')
     if vim.fn.executable('git') == 1 then
         local path = bin_dir_path .. '/typeshed'
@@ -73,7 +75,7 @@ local download_requirements = function()
     else
         vim.api.nvim_err_writeln("git needed to download python typeshed")
     end
-    vim.cmd.LspStart('odools')
+    vim.cmd.LspRestart('odools')
 end
 
 local odoo_command = function(opts)
