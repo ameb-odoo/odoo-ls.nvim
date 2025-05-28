@@ -4,9 +4,6 @@ command.target = "0.4.0"
 command.bin_path = ""
 
 local download = function(url, output_path, asset_type)
-    print("Starting download from: " .. url)
-    print("Saving to: " .. output_path)
-
     local stdout = vim.uv.new_pipe(false)
     local stderr = vim.uv.new_pipe(false)
 
@@ -19,6 +16,9 @@ local download = function(url, output_path, asset_type)
         cmd = "git"
         args = { "clone", "-q", url, output_path}
     end
+    vim.api.nvim_echo({{"Starting download from: " .. url}}, true, {})
+    vim.api.nvim_echo({{"Saving to: " .. output_path}}, true, {})
+
     handle = vim.uv.spawn(cmd, {
         args = args,
         stdio = { nil, stdout, stderr },
@@ -27,11 +27,13 @@ local download = function(url, output_path, asset_type)
         stderr:close()
         handle:close()
 
-        if code == 0 then
-            print("\nDownload successful!")
-        else
-            print("\nDownload failed with exit code " .. code)
+        local msg = {"\nDownload successful!"}
+        if code ~= 0 then
+            msg = {"\nDownload failed with exit code " .. code}
         end
+        vim.schedule(function()
+            vim.api.nvim_echo({msg}, true, {})
+        end)
     end)
 
     stdout:read_start(function(err, data)
@@ -64,7 +66,7 @@ local download_requirements = function()
         if vim.fn.isdirectory(path) == 0 then
             download('https://github.com/python/typeshed.git', path, 'repo')
         else
-            print("typeshed already downloaded")
+            vim.api.nvim_echo({{"typeshed already downloaded"}}, true, {})
         end
     else
         vim.api.nvim_err_writeln("git needed to download python typeshed")
