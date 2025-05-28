@@ -30,6 +30,8 @@ local download = function(url, output_path, asset_type)
         local msg = {"\nDownload successful!"}
         if code ~= 0 then
             msg = {"\nDownload failed with exit code " .. code}
+        else
+            vim.uv.fs_chmod(output_path, 493)
         end
         vim.schedule(function()
             vim.api.nvim_echo({msg}, true, {})
@@ -71,7 +73,6 @@ local download_requirements = function()
     else
         vim.api.nvim_err_writeln("git needed to download python typeshed")
     end
-    os.execute('chmod +x ' .. bin_path)
     vim.cmd.LspStart('odools')
 end
 
