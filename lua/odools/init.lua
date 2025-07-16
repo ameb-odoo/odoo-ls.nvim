@@ -29,7 +29,7 @@ M.setup = function(opt)
         default_config = {
             name = 'odools',
             cmd = {server_path},
-            root_dir = function() return vim.fn.fnamemodify(opt.server_path, ":h") end,
+            root_dir = opt.root_dir or function() return vim.fn.fnamemodify(opt.server_path, ":h")
             workspace_folders = {
                 {
                     uri = function() return opt.root_dir end,
